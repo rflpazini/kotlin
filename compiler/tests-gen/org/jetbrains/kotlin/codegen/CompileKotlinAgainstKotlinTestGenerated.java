@@ -209,11 +209,6 @@ public class CompileKotlinAgainstKotlinTestGenerated extends AbstractCompileKotl
         runTest("compiler/testData/compileKotlinAgainstKotlin/internalWithOtherModuleName.kt");
     }
 
-    @TestMetadata("intersectionOverrideProperies.kt")
-    public void testIntersectionOverrideProperies() throws Exception {
-        runTest("compiler/testData/compileKotlinAgainstKotlin/intersectionOverrideProperies.kt");
-    }
-
     @TestMetadata("jvmField.kt")
     public void testJvmField() throws Exception {
         runTest("compiler/testData/compileKotlinAgainstKotlin/jvmField.kt");
