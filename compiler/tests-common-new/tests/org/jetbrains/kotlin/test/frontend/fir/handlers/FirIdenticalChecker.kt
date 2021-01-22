@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.test.utils.originalTestDataFile
 import java.io.File
 
 class FirIdenticalChecker(testServices: TestServices) : AfterAnalysisChecker(testServices) {
-    override fun check(failedAssertions: List<AssertionError>) {
+    override fun check(failedAssertions: List<Throwable>) {
         if (failedAssertions.isNotEmpty()) return
         val file = testServices.moduleStructure.originalTestDataFiles.first()
         if (file.isFirTestData) {
