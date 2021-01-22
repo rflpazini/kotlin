@@ -68,8 +68,14 @@ class TestRunner(private val testConfiguration: TestConfiguration) {
             e.sanitize()
             failedException = e
         }
+
         for (handler in testConfiguration.getAllHandlers()) {
-            withAssertionCatching { handler.processAfterAllModules(failedAssertions.isNotEmpty()) }
+            withAssertionCatching {
+                val thereWasAnException = failedException != null || failedAssertions.isNotEmpty()
+                if (handler.shouldRun(thereWasAnException)) {
+                    handler.processAfterAllModules(thereWasAnException)
+                }
+            }
         }
         if (testConfiguration.metaInfoHandlerEnabled) {
             withAssertionCatching(insertExceptionInStart = true) {
@@ -110,7 +116,9 @@ class TestRunner(private val testConfiguration: TestConfiguration) {
         val frontendHandlers: List<AnalysisHandler<*>> = testConfiguration.getHandlers(frontendKind)
         for (frontendHandler in frontendHandlers) {
             withAssertionCatching {
-                frontendHandler.hackyProcess(module, frontendArtifacts)
+                if (frontendHandler.shouldRun(failedAssertions.isNotEmpty())) {
+                    frontendHandler.hackyProcess(module, frontendArtifacts)
+                }
             }
         }
 
@@ -122,7 +130,11 @@ class TestRunner(private val testConfiguration: TestConfiguration) {
 
         val backendHandlers: List<AnalysisHandler<*>> = testConfiguration.getHandlers(backendKind)
         for (backendHandler in backendHandlers) {
-            withAssertionCatching { backendHandler.hackyProcess(module, backendInputInfo) }
+            withAssertionCatching {
+                if (backendHandler.shouldRun(failedAssertions.isNotEmpty())) {
+                    backendHandler.hackyProcess(module, backendInputInfo)
+                }
+            }
         }
 
         for (artifactKind in moduleStructure.getTargetArtifactKinds(module)) {
@@ -134,7 +146,11 @@ class TestRunner(private val testConfiguration: TestConfiguration) {
 
             val binaryHandlers: List<AnalysisHandler<*>> = testConfiguration.getHandlers(artifactKind)
             for (binaryHandler in binaryHandlers) {
-                withAssertionCatching { binaryHandler.hackyProcess(module, binaryArtifact) }
+                withAssertionCatching {
+                    if (binaryHandler.shouldRun(failedAssertions.isNotEmpty())) {
+                        binaryHandler.hackyProcess(module, binaryArtifact)
+                    }
+                }
             }
         }
     }
@@ -154,6 +170,10 @@ class TestRunner(private val testConfiguration: TestConfiguration) {
 
     private fun Throwable.sanitize() {
         sanitizeStackTrace(RUNNER_NAME, RUN_TEST_NAME, STACK_TRACE_OFFSET)
+    }
+
+    private fun AnalysisHandler<*>.shouldRun(thereWasAnException: Boolean): Boolean {
+        return !(doNotRunIfThereWasPreviousFailures && thereWasAnException)
     }
 }
 

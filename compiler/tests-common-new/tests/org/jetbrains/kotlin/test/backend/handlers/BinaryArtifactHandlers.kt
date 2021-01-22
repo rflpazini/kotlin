@@ -11,13 +11,28 @@ import org.jetbrains.kotlin.test.model.BinaryArtifacts
 import org.jetbrains.kotlin.test.services.TestServices
 
 abstract class JvmBinaryArtifactHandler(
-    testServices: TestServices
-) : BinaryArtifactHandler<BinaryArtifacts.Jvm>(testServices, ArtifactKinds.Jvm)
+    testServices: TestServices,
+    doNotRunIfThereWasPreviousFailures: Boolean = false
+) : BinaryArtifactHandler<BinaryArtifacts.Jvm>(
+    testServices,
+    ArtifactKinds.Jvm,
+    doNotRunIfThereWasPreviousFailures
+)
 
 abstract class JsBinaryArtifactHandler(
-    testServices: TestServices
-) : BinaryArtifactHandler<BinaryArtifacts.Js>(testServices, ArtifactKinds.Js)
+    testServices: TestServices,
+    doNotRunIfThereWasPreviousFailures: Boolean = false
+) : BinaryArtifactHandler<BinaryArtifacts.Js>(
+    testServices,
+    ArtifactKinds.Js,
+    doNotRunIfThereWasPreviousFailures
+)
 
 abstract class NativeBinaryArtifactHandler(
-    testServices: TestServices
-) : BinaryArtifactHandler<BinaryArtifacts.Native>(testServices, ArtifactKinds.Native)
+    testServices: TestServices,
+    doNotRunIfThereWasPreviousFailures: Boolean = false
+) : BinaryArtifactHandler<BinaryArtifacts.Native>(
+    testServices,
+    ArtifactKinds.Native,
+    doNotRunIfThereWasPreviousFailures
+)

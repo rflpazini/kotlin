@@ -11,7 +11,10 @@ import org.jetbrains.kotlin.test.services.ServiceRegistrationData
 import org.jetbrains.kotlin.test.services.TestServices
 import org.jetbrains.kotlin.test.services.assertions
 
-abstract class AnalysisHandler<A : ResultingArtifact<A>>(val testServices: TestServices) {
+abstract class AnalysisHandler<A : ResultingArtifact<A>>(
+    val testServices: TestServices,
+    val doNotRunIfThereWasPreviousFailures: Boolean
+) {
     protected val assertions: Assertions
         get() = testServices.assertions
 
@@ -30,15 +33,18 @@ abstract class AnalysisHandler<A : ResultingArtifact<A>>(val testServices: TestS
 
 abstract class FrontendOutputHandler<R : ResultingArtifact.FrontendOutput<R>>(
     testServices: TestServices,
-    override val artifactKind: FrontendKind<R>
-) : AnalysisHandler<R>(testServices)
+    override val artifactKind: FrontendKind<R>,
+    doNotRunIfThereWasPreviousFailures: Boolean
+) : AnalysisHandler<R>(testServices, doNotRunIfThereWasPreviousFailures)
 
 abstract class BackendInputHandler<I : ResultingArtifact.BackendInput<I>>(
     testServices: TestServices,
-    override val artifactKind: BackendKind<I>
-) : AnalysisHandler<I>(testServices)
+    override val artifactKind: BackendKind<I>,
+    doNotRunIfThereWasPreviousFailures: Boolean
+) : AnalysisHandler<I>(testServices, doNotRunIfThereWasPreviousFailures)
 
 abstract class BinaryArtifactHandler<A : ResultingArtifact.Binary<A>>(
     testServices: TestServices,
-    override val artifactKind: BinaryKind<A>
-) : AnalysisHandler<A>(testServices)
+    override val artifactKind: BinaryKind<A>,
+    doNotRunIfThereWasPreviousFailures: Boolean
+) : AnalysisHandler<A>(testServices, doNotRunIfThereWasPreviousFailures)
