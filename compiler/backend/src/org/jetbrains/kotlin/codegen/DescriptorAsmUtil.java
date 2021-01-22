@@ -368,6 +368,17 @@ public class DescriptorAsmUtil {
             return ACC_PRIVATE;
         }
 
+        // Sealed class constructors should be ACC_PRIVATE.
+        // In 1.4 and before, sealed class constructors had PRIVATE visibility, and were represented as private methods in bytecode.
+        // In 1.5 (+AllowSealedInheritorsInDifferentFilesOfSamePackage), sealed class constructors became INTERNAL,
+        // but still should be represented as private methods in bytecode in order to prevent inheriting from sealed classes on JVM.
+        if (memberDescriptor instanceof ConstructorDescriptor &&
+            !(memberDescriptor instanceof AccessorForConstructorDescriptor) &&
+            isSealedClass(((ConstructorDescriptor) memberDescriptor).getConstructedClass())
+        ) {
+            return ACC_PRIVATE;
+        }
+
         if (isInlineOnlyPrivateInBytecode(memberDescriptor)) {
             return ACC_PRIVATE;
         }
@@ -892,5 +903,13 @@ public class DescriptorAsmUtil {
         OwnerKind kind = context.getContextKind();
         //Trait always should have this descriptor
         return kind != OwnerKind.DEFAULT_IMPLS && isStaticMethod(kind, descriptor) ? 0 : 1;
+    }
+
+    public static boolean isHiddenConstructor(FunctionDescriptor descriptor) {
+        if (!(descriptor instanceof ClassConstructorDescriptor)) return false;
+
+        ClassConstructorDescriptor classConstructorDescriptor = (ClassConstructorDescriptor) descriptor;
+        return InlineClassManglingRulesKt.shouldHideConstructorDueToInlineClassTypeValueParameters(descriptor) ||
+               isSealedClass(classConstructorDescriptor.getConstructedClass());
     }
 }
