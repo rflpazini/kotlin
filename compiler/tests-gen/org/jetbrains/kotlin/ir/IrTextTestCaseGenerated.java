@@ -1857,6 +1857,11 @@ public class IrTextTestCaseGenerated extends AbstractIrTextTestCase {
             runTest("compiler/testData/ir/irText/firProblems/kt43342.kt");
         }
 
+        @TestMetadata("Modality.kt")
+        public void testModality() throws Exception {
+            runTest("compiler/testData/ir/irText/firProblems/Modality.kt");
+        }
+
         @TestMetadata("MultiList.kt")
         public void testMultiList() throws Exception {
             runTest("compiler/testData/ir/irText/firProblems/MultiList.kt");
