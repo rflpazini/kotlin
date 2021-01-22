@@ -9,9 +9,16 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.testFramework.TestDataFile
 import org.jetbrains.kotlin.test.model.*
 import org.jetbrains.kotlin.test.services.*
+import org.jetbrains.kotlin.test.utils.sanitizeStackTrace
 import java.io.IOException
 
 class TestRunner(private val testConfiguration: TestConfiguration) {
+    companion object {
+        private val RUNNER_NAME: String = TestRunner::class.qualifiedName!!
+        private const val RUN_TEST_NAME: String = "runTest"
+        private const val STACK_TRACE_OFFSET = 4
+    }
+
     private val failedAssertions = mutableListOf<Throwable>()
 
     fun runTest(@TestDataFile testDataFileName: String) {
@@ -58,6 +65,7 @@ class TestRunner(private val testConfiguration: TestConfiguration) {
                 processModule(services, module, dependencyProvider, moduleStructure)
             }
         } catch (e: Throwable) {
+            e.sanitize()
             failedException = e
         }
         for (handler in testConfiguration.getAllHandlers()) {
@@ -135,12 +143,17 @@ class TestRunner(private val testConfiguration: TestConfiguration) {
         try {
             block()
         } catch (e: Throwable) {
+            e.sanitize()
             if (insertExceptionInStart) {
                 failedAssertions.add(0, e)
             } else {
                 failedAssertions += e
             }
         }
+    }
+
+    private fun Throwable.sanitize() {
+        sanitizeStackTrace(RUNNER_NAME, RUN_TEST_NAME, STACK_TRACE_OFFSET)
     }
 }
 
