@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.ir.backend.js.lower
 import org.jetbrains.kotlin.backend.common.BodyLoweringPass
 import org.jetbrains.kotlin.backend.common.lower.SingleAbstractMethodLowering
 import org.jetbrains.kotlin.backend.common.ScopeWithIr
+import org.jetbrains.kotlin.backend.common.ir.isTopLevel
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.DescriptorVisibility
 import org.jetbrains.kotlin.ir.backend.js.JsIrBackendContext
@@ -25,7 +26,10 @@ import org.jetbrains.kotlin.ir.util.render
 class JsSingleAbstractMethodLowering(context: JsIrBackendContext) : SingleAbstractMethodLowering(context), BodyLoweringPass {
 
     override fun getWrapperVisibility(expression: IrTypeOperatorCall, scopes: List<ScopeWithIr>): DescriptorVisibility {
-        return if (scopes.isEmpty()) DescriptorVisibilities.PRIVATE else DescriptorVisibilities.LOCAL
+        return if (scopes.isEmpty() || scopes.any { (it.irElement as? IrDeclaration)?.isTopLevel == true })
+            DescriptorVisibilities.PRIVATE
+        else
+            DescriptorVisibilities.LOCAL
     }
 
     override val IrType.needEqualsHashCodeMethods get() = false
